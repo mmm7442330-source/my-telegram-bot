@@ -50,16 +50,21 @@ def mute_user(chat_id, user_id):
 
 
 def handle_message(message):
-    chat_id = message["chat"]["id"]
+    chat = message.get("chat", {})
+    chat_id = chat.get("id")
+    chat_type = chat.get("type")
+
     text = message.get("text", "")
 
-    if text == "/start":
+    print("MESSAGE:", chat_type, chat_id, repr(text), flush=True)
+
+    if text.startswith("/start"):
         send_message(
             chat_id,
             "هلا 👋 أنا بوت الإدارة الخاص بك."
         )
 
-    elif text == "/help":
+    elif text.startswith("/help"):
         send_message(
             chat_id,
             "أوامر الإدارة:\n"
@@ -69,7 +74,7 @@ def handle_message(message):
             "/rules - عرض القوانين"
         )
 
-    elif text == "/rules":
+    elif text.startswith("/rules"):
         send_message(
             chat_id,
             "📜 قوانين المجموعة:\n"
@@ -78,21 +83,21 @@ def handle_message(message):
             "3- ممنوع نشر الروابط بدون إذن"
         )
 
-    elif text == "/del":
+    elif text.startswith("/del"):
         reply = message.get("reply_to_message")
 
         if reply:
             delete_message(chat_id, reply["message_id"])
             delete_message(chat_id, message["message_id"])
 
-    elif text == "/ban":
+    elif text.startswith("/ban"):
         reply = message.get("reply_to_message")
 
         if reply:
             ban_user(chat_id, reply["from"]["id"])
             delete_message(chat_id, message["message_id"])
 
-    elif text == "/mute":
+    elif text.startswith("/mute"):
         reply = message.get("reply_to_message")
 
         if reply:
@@ -117,7 +122,7 @@ def main():
                     handle_message(update["message"])
 
         except Exception as e:
-            print("Error:", e)
+            print("ERROR:", e, flush=True)
             time.sleep(5)
 
 
